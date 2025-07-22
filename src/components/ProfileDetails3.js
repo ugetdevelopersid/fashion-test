@@ -18,15 +18,15 @@ function ProfileDetails3() {
   ];
 
   const hairLengths = [
-    'Short (Above shoulders)',
     'Medium (Shoulder length)',
     'Long (Below shoulders)',
+    'Short (Above shoulders)',
     'Very Long (Waist length or longer)'
   ];
 
   const hairColors = [
-    'Black',
     'Brown',
+    'Black',
     'Blonde',
     'Red',
     'Gray',

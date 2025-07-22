@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Menu() {
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Get user data from localStorage or use default
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUserName(`${user.firstName || 'User'} ${user.lastName || ''}`.trim());
+      setUserEmail(user.email || 'user@example.com');
+    } else {
+      setUserName('User');
+      setUserEmail('user@example.com');
+    }
+  }, []);
 
   const handleBack = () => {
     navigate('/dashboard');
@@ -20,8 +35,8 @@ function Menu() {
         <div className="user-section">
           <div className="user-info">
             <div className="user-details">
-              <h3 className="user-name">Shubhi Srivastava</h3>
-              <p className="user-email">shubhisriv1998@gmail.com</p>
+              <h3 className="user-name">{userName}</h3>
+              <p className="user-email">{userEmail}</p>
             </div>
             <div className="user-avatar">
               <div className="avatar-placeholder"></div>
@@ -42,17 +57,17 @@ function Menu() {
           </div>
           <hr className="menu-divider" />
           
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => navigate('/clothing-selection')}>
             Saved outfits
           </div>
           <hr className="menu-divider" />
           
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => navigate('/filters')}>
             Edit preferences
           </div>
           <hr className="menu-divider" />
           
-          <div className="menu-item">
+          <div className="menu-item" onClick={() => alert('FAQs coming soon!')}>
             FAQs
           </div>
           <hr className="menu-divider" />
