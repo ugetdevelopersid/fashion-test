@@ -12,7 +12,9 @@ function ProfileDetails1() {
     waist: '',
     hips: ''
   });
+  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
+  const [showAgeRangeDropdown, setShowAgeRangeDropdown] = useState(false);
 
   // Load existing user data on component mount
   useEffect(() => {
@@ -26,15 +28,15 @@ function ProfileDetails1() {
           const preFilledData = {
             gender: userData.gender || '',
             ageRange: userData.ageRange || '',
-            heightFeet: userData.heightFeet || userData.height?.split("'")[0] || '',
-            heightInches: userData.heightInches || userData.height?.split("'")[1]?.replace('"', '') || '',
+            heightFeet: userData.heightFeet || '',
+            heightInches: userData.heightInches || '',
             bust: userData.bust || '',
             waist: userData.waist || '',
             hips: userData.hips || ''
           };
           
           setFormData(preFilledData);
-          console.log('✅ Loaded existing user data:', preFilledData);
+          console.log('✅ Loaded existing user data for ProfileDetails1:', preFilledData);
         }
       } catch (error) {
         console.error('Error loading existing data:', error);
@@ -44,6 +46,20 @@ function ProfileDetails1() {
     };
 
     loadExistingData();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.custom-dropdown')) {
+        setShowAgeRangeDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
   const navigate = useNavigate();
 
@@ -84,9 +100,8 @@ function ProfileDetails1() {
       const updatedUserData = {
         ...userData,
         ...formData,
-        // Add calculated height in inches
-        height: `${formData.heightFeet}'${formData.heightInches}"`,
-        heightInches: parseInt(formData.heightFeet) * 12 + parseInt(formData.heightInches)
+        // Add calculated height in standard format
+        height: `${formData.heightFeet}'${formData.heightInches}"`
       };
       
       // Save to localStorage
@@ -132,10 +147,11 @@ function ProfileDetails1() {
             <div className="progress-step-number">4</div>
             <div className="progress-step-label">Appearance</div>
           </div>
+          <div className="progress-step">
+            <div className="progress-step-number">5</div>
+            <div className="progress-step-label">Preferences</div>
+          </div>
         </div>
-        <p className="step-description">
-          Tell us about your physical characteristics so we can provide accurate outfit recommendations.
-        </p>
       </div>
 
       <div className="form-container">
@@ -202,34 +218,78 @@ function ProfileDetails1() {
           
           <div className="input-group">
             <label>Age Range</label>
-            <div style={{ position: 'relative', marginTop: '8px' }}>
+            <div className="custom-dropdown" style={{ position: 'relative', marginTop: '8px' }}>
               <select
                 name="ageRange"
                 className="input-field"
                 value={formData.ageRange}
                 onChange={handleChange}
                 required
-                style={{ 
-                  width: '100%',
-                  padding: '12px 15px',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  background: 'white',
-                  color: '#333',
-                  appearance: 'none',
-                  backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22/%3E%3C/svg%3E")',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '12px auto',
-                  paddingRight: '30px'
-                }}
+                style={{ display: 'none' }}
               >
                 <option value="">Select age range</option>
                 {ageRanges.map((range, index) => (
                   <option key={index} value={range}>{range}</option>
                 ))}
               </select>
+              <div 
+                className="dropdown-display" 
+                onClick={() => setShowAgeRangeDropdown(!showAgeRangeDropdown)}
+                style={{
+                  padding: '12px 15px',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
+                {formData.ageRange ? (
+                  <span>{formData.ageRange}</span>
+                ) : (
+                  <span style={{ color: '#999' }}>Select age range</span>
+                )}
+                <span style={{ fontSize: '12px' }}>▼</span>
+              </div>
+              {showAgeRangeDropdown && (
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    backgroundColor: 'white',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {ageRanges.map((range, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setFormData({ ...formData, ageRange: range });
+                        setShowAgeRangeDropdown(false);
+                      }}
+                      style={{
+                        padding: '12px 15px',
+                        cursor: 'pointer',
+                        borderBottom: index < ageRanges.length - 1 ? '1px solid #f0f0f0' : 'none',
+                        backgroundColor: formData.ageRange === range ? '#f8f9fa' : 'transparent'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = formData.ageRange === range ? '#f8f9fa' : 'transparent'}
+                    >
+                      <span style={{ fontSize: '14px' }}>{range}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           

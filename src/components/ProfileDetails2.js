@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DatabaseService from '../services/databaseService';
+// DatabaseService import removed as it's not used in this component
 import PersistentBackButton from './PersistentBackButton';
 
 function ProfileDetails2() {
@@ -8,7 +8,9 @@ function ProfileDetails2() {
     skinTone: '', hairLength: '', hairColor: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
+  const [showHairLengthDropdown, setShowHairLengthDropdown] = useState(false);
 
   // Load existing user data on component mount
   useEffect(() => {
@@ -36,6 +38,20 @@ function ProfileDetails2() {
     };
 
     loadExistingData();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.custom-dropdown')) {
+        setShowHairLengthDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
   const navigate = useNavigate();
 
@@ -78,25 +94,13 @@ function ProfileDetails2() {
     });
   };
 
-  const handleSkinToneSelect = (tone) => {
-    setFormData({
-      ...formData,
-      skinTone: tone
-    });
-  };
 
-  const handleHairColorSelect = (color) => {
-    setFormData({
-      ...formData,
-      hairColor: color
-    });
-  };
 
   const handleBack = () => {
     navigate('/profile-details-1');
   };
 
-  const handleFinish = async (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
     
     if (formData.skinTone && formData.hairLength && formData.hairColor) {
@@ -107,30 +111,20 @@ function ProfileDetails2() {
         const userData = localStorage.getItem('userData');
         const user = userData ? JSON.parse(userData) : {};
         
-        // Combine all profile data
-        const profileData = {
+        // Update user data with appearance details
+        const updatedData = {
           ...user,
-          ...formData,
-          profileCompleted: true,
-          completedAt: new Date().toISOString()
+          ...formData
         };
 
-        // Save to database
-        const result = await DatabaseService.saveProfileData(profileData);
+        // Save updated data to localStorage
+        localStorage.setItem('userData', JSON.stringify(updatedData));
+        console.log('✅ Saved appearance details to localStorage:', updatedData);
         
-        if (result.success) {
-          console.log('Profile setup completed and saved to database:', profileData);
-          alert('Profile setup completed successfully!');
-          navigate('/dashboard');
-        } else {
-          console.error('Failed to save to database:', result.error);
-          alert('Profile setup completed, but there was an issue saving to the database. Please try again later.');
-          navigate('/dashboard');
-        }
+        navigate('/profile-details-3');
       } catch (error) {
-        console.error('Error during profile completion:', error);
-        alert('Profile setup completed, but there was an issue saving to the database. Please try again later.');
-        navigate('/dashboard');
+        console.error('Error saving appearance details:', error);
+        alert('There was an issue saving your data. Please try again.');
       } finally {
         setIsSaving(false);
       }
@@ -163,103 +157,167 @@ function ProfileDetails2() {
             <div className="progress-step-number">4</div>
             <div className="progress-step-label">Appearance</div>
           </div>
+          <div className="progress-step">
+            <div className="progress-step-number">5</div>
+            <div className="progress-step-label">Preferences</div>
+          </div>
         </div>
-        <p className="step-description">
-          Last step! Tell us about your appearance to help us create personalized outfit recommendations.
-        </p>
       </div>
 
       <div className="form-container">
         <h1 className="title">Appearance Details</h1>
         <p style={{ textAlign: 'center', marginBottom: '30px', color: '#666' }}>Tell us about your appearance</p>
         
-        <form onSubmit={handleFinish}>
+        <form onSubmit={handleNext}>
           <div className="input-group">
             <label>What's your skin tone?</label>
-            <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>Fitzpatrick Scale:</p>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-              {skinTones.map((tone, index) => (
-                <button
-                  key={index} type="button" onClick={() => handleSkinToneSelect(tone.type)}
-                  style={{
-                    width: '80px', height: '40px', borderRadius: '6px',
-                    backgroundColor: tone.color, border: formData.skinTone === tone.type ? '3px solid #007bff' : '2px solid #e0e0e0',
-                    cursor: 'pointer', position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: tone.color === '#FFDBB4' || tone.color === '#EDB98A' ? '#333' : '#fff',
-                    textShadow: tone.color === '#FFDBB4' || tone.color === '#EDB98A' ? 'none' : '0px 0px 2px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {formData.skinTone === tone.type && (
-                    <div style={{
-                      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                      width: '12px', height: '12px', backgroundColor: '#007bff', borderRadius: '50%',
-                      border: '2px solid white'
-                    }}></div>
-                  )}
-                  {tone.type}
-                </button>
-              ))}
+            <div style={{ marginTop: '15px' }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: '4px', 
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {skinTones.map((tone, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setFormData({ ...formData, skinTone: tone.type })}
+                    style={{
+                      width: '60px',
+                      height: '40px',
+                      backgroundColor: tone.color,
+                      cursor: 'pointer',
+                      border: formData.skinTone === tone.type ? '3px solid #333' : '2px solid #ddd',
+                      borderRadius: '6px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: formData.skinTone === tone.type ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = formData.skinTone === tone.type ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)';
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-            {formData.skinTone && (
-              <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                Selected: {formData.skinTone}
-              </p>
-            )}
           </div>
 
           <div className="input-group">
             <label>Hair Color</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '8px' }}>
-              {hairColors.map((color, index) => (
-                <button
-                  key={index} type="button" onClick={() => handleHairColorSelect(color.name)}
-                  style={{
-                    width: '100%', height: '40px', borderRadius: '6px',
-                    backgroundColor: color.color,
-                    color: color.color === '#FFD54F' || color.color === '#FAFAFA' ? '#333' : '#fff',
-                    border: formData.hairColor === color.name ? '3px solid #007bff' : '2px solid #e0e0e0',
-                    cursor: 'pointer',
-                    fontSize: '12px', 
-                    fontWeight: 'bold',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    textShadow: color.color === '#FFD54F' || color.color === '#FAFAFA' ? 'none' : '0px 0px 2px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {formData.hairColor === color.name && (
-                    <div style={{
-                      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                      width: '12px', height: '12px', backgroundColor: '#007bff', borderRadius: '50%',
-                      border: '2px solid white'
-                    }}></div>
-                  )}
-                  {color.name}
-                </button>
-              ))}
+            <div style={{ marginTop: '15px' }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: '4px', 
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {hairColors.map((color, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setFormData({ ...formData, hairColor: color.name })}
+                    style={{
+                      width: '60px',
+                      height: '40px',
+                      backgroundColor: color.color,
+                      cursor: 'pointer',
+                      border: formData.hairColor === color.name ? '3px solid #333' : '2px solid #ddd',
+                      borderRadius: '6px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: formData.hairColor === color.name ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = formData.hairColor === color.name ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)';
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-            {formData.hairColor && (
-              <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                Selected: {formData.hairColor}
-              </p>
-            )}
           </div>
 
           <div className="input-group">
             <label>Hair length</label>
-            <select name="hairLength" className="input-field" value={formData.hairLength} onChange={handleChange} required>
-              <option value="">Select hair length</option>
-              {hairLengths.map((length, index) => (
-                <option key={index} value={length}>{length}</option>
-              ))}
-            </select>
+            <div className="custom-dropdown" style={{ position: 'relative' }}>
+              <select
+                className="dropdown-field"
+                name="hairLength"
+                value={formData.hairLength}
+                onChange={handleChange}
+                required
+                style={{ display: 'none' }}
+              >
+                <option value="">Select hair length</option>
+                {hairLengths.map((length, index) => (
+                  <option key={index} value={length}>{length}</option>
+                ))}
+              </select>
+              <div 
+                className="dropdown-display" 
+                onClick={() => setShowHairLengthDropdown(!showHairLengthDropdown)}
+                style={{
+                  padding: '12px 15px',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
+                {formData.hairLength ? (
+                  <span>{formData.hairLength}</span>
+                ) : (
+                  <span style={{ color: '#999' }}>Select hair length</span>
+                )}
+                <span style={{ fontSize: '12px' }}>▼</span>
+              </div>
+              {showHairLengthDropdown && (
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '0',
+                    right: '0',
+                    backgroundColor: 'white',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {hairLengths.map((length, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setFormData({ ...formData, hairLength: length });
+                        setShowHairLengthDropdown(false);
+                      }}
+                      style={{
+                        padding: '12px 15px',
+                        cursor: 'pointer',
+                        borderBottom: index < hairLengths.length - 1 ? '1px solid #f0f0f0' : 'none',
+                        backgroundColor: formData.hairLength === length ? '#f8f9fa' : 'transparent'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = formData.hairLength === length ? '#f8f9fa' : 'transparent'}
+                    >
+                      <span style={{ fontSize: '14px' }}>{length}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="button-group">
@@ -267,7 +325,7 @@ function ProfileDetails2() {
               ← BACK
             </button>
             <button type="submit" className="btn btn-next" disabled={isSaving}>
-              {isSaving ? 'SAVING...' : 'FINISH'}
+              {isSaving ? 'SAVING...' : 'NEXT →'}
             </button>
           </div>
         </form>

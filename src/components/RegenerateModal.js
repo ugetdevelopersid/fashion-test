@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function RegenerateModal() {
+function RegenerateModal({ onClose }) {
   const [selectedOption, setSelectedOption] = useState('new-recommendations');
   const navigate = useNavigate();
 
@@ -10,14 +10,17 @@ function RegenerateModal() {
       navigate('/avatar-feedback');
     } else if (selectedOption === 'specific-part') {
       navigate('/outfit-feedback');
+    } else if (selectedOption === 'side-back-view') {
+      navigate('/side-back-view');
     } else {
       // Generate new recommendations
       navigate('/outfit-generation');
     }
+    if (onClose) onClose();
   };
 
   const handleBackdropClick = () => {
-    navigate('/outfit-generation');
+    if (onClose) onClose();
   };
 
   return (
@@ -60,6 +63,18 @@ function RegenerateModal() {
               onChange={(e) => setSelectedOption(e.target.value)}
             />
             <label htmlFor="new-recommendations">I just want new recommendations</label>
+          </div>
+          
+          <div className="radio-option">
+            <input 
+              type="radio" 
+              id="side-back-view" 
+              name="change-option" 
+              value="side-back-view"
+              checked={selectedOption === 'side-back-view'}
+              onChange={(e) => setSelectedOption(e.target.value)}
+            />
+            <label htmlFor="side-back-view">Generate side and back view</label>
           </div>
         </div>
 

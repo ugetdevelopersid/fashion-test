@@ -8,6 +8,7 @@ function PersonalInfo() {
     lastName: '',
     email: ''
   });
+  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
 
   // Load existing user data on component mount
@@ -94,10 +95,11 @@ function PersonalInfo() {
             <div className="progress-step-number">4</div>
             <div className="progress-step-label">Appearance</div>
           </div>
+          <div className="progress-step">
+            <div className="progress-step-number">5</div>
+            <div className="progress-step-label">Preferences</div>
+          </div>
         </div>
-        <p className="step-description">
-          Let's get to know you better. Please provide your basic contact information.
-        </p>
       </div>
 
       <div className="form-container">

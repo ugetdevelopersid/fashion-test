@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PersistentBackButton from './PersistentBackButton';
+import RegenerateModal from './RegenerateModal';
+import InteractiveFeedback from './InteractiveFeedback';
 
 function OutfitGeneration() {
   const [rating, setRating] = useState(null);
   const [showProfileViews, setShowProfileViews] = useState(false);
   const [currentTab, setCurrentTab] = useState('back');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [feedbackData, setFeedbackData] = useState({
     outfitStyle: false,
     colorCombination: false,
@@ -16,7 +19,8 @@ function OutfitGeneration() {
     additionalComments: ''
   });
   const [showThankYou, setShowThankYou] = useState(false);
-  const [showGeneratedImage, setShowGeneratedImage] = useState(false);
+  const [showGeneratedImage, setShowGeneratedImage] = useState(true); // Changed to true to show image directly
+  const [showInteractiveFeedback, setShowInteractiveFeedback] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({
     'User Preferences': false,
     'Outfit Preferences': false
@@ -67,7 +71,19 @@ function OutfitGeneration() {
 
   const handleSubmitRating = () => {
     console.log('Rating submitted:', rating);
-    // Here you would typically save the rating to a database
+    if (rating) {
+      setShowInteractiveFeedback(true);
+    }
+  };
+
+  const handleFeedbackSubmit = (feedbackData) => {
+    console.log('Interactive feedback submitted:', feedbackData);
+    setShowThankYou(true);
+    setTimeout(() => setShowThankYou(false), 3000);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowInteractiveFeedback(false);
   };
 
   const handleViewToggle = (tab) => {
@@ -112,8 +128,7 @@ function OutfitGeneration() {
   };
 
   const handleRegenerate = () => {
-    console.log('Regenerating outfit');
-    // Here you would typically trigger the regeneration process
+    setShowRegenerateModal(true);
   };
 
   const handleMorePreferences = () => {
@@ -192,37 +207,16 @@ function OutfitGeneration() {
           {/* Image Preview Section */}
           <div className="image-preview-section">
             <div className="preview-container">
-              <button className="nav-arrow left" onClick={handlePreviousImage}>
-                ←
-              </button>
               <div className="image-preview">
                 <div className="preview-text">GENERATED IMAGE PREVIEW</div>
               </div>
-              <button className="nav-arrow right" onClick={handleNextImage}>
-                →
-              </button>
             </div>
           </div>
           
-          {/* View Toggle Buttons */}
-          <div className="view-buttons">
-            <button 
-              className={`view-button ${currentTab === 'back' ? 'active' : ''}`}
-              onClick={() => handleViewToggle('back')}
-            >
-              Back View
-            </button>
-            <button 
-              className={`view-button ${currentTab === 'front' ? 'active' : ''}`}
-              onClick={() => handleViewToggle('front')}
-            >
-              Front View
-            </button>
-            <button 
-              className={`view-button ${currentTab === 'side' ? 'active' : ''}`}
-              onClick={() => handleViewToggle('side')}
-            >
-              Side View
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button className="regenerate-button" onClick={handleRegenerate}>
+              GENERATE AGAIN
             </button>
           </div>
           
@@ -230,37 +224,20 @@ function OutfitGeneration() {
           <div className="rating-section">
             <div className="rating-title">How would you rate this outfit?</div>
             <div className="rating-slider-container">
-              <input 
-                type="range" 
-                min="1" 
-                max="5" 
-                value={rating || 3} 
-                onChange={(e) => handleRating(parseInt(e.target.value))}
-                className="rating-slider"
-              />
-              <div className="slider-labels">
-                <span>Not great</span>
-                <span>Perfect</span>
+              <div className="rating-scale">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <span 
+                    key={num} 
+                    className={`rating-number ${rating >= num ? 'active' : ''}`}
+                    onClick={() => setRating(num)}
+                  >
+                    {num}
+                  </span>
+                ))}
               </div>
             </div>
             <button className="submit-button" onClick={handleSubmitRating}>
               SUBMIT
-            </button>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="action-buttons">
-            <button className="generate-button" onClick={handleProfileViewsToggle}>
-              {showProfileViews ? 'HIDE PROFILE VIEWS' : 'SHOW PROFILE VIEWS'}
-            </button>
-            <button className="regenerate-button" onClick={handleRegenerate}>
-              REGENERATE
-            </button>
-            <button className="generate-button" onClick={handleFeedbackToggle}>
-              GIVE FEEDBACK
-            </button>
-            <button className="generate-button" onClick={handleBackToCategorySelection}>
-              BACK TO CATEGORY SELECTION
             </button>
           </div>
           
@@ -345,6 +322,19 @@ function OutfitGeneration() {
               </div>
             </div>
           )}
+          
+          {/* Regenerate Modal */}
+          {showRegenerateModal && (
+            <RegenerateModal onClose={() => setShowRegenerateModal(false)} />
+          )}
+
+          {/* Interactive Feedback Modal */}
+          <InteractiveFeedback
+            isOpen={showInteractiveFeedback}
+            onClose={handleCloseFeedback}
+            outfitRating={rating}
+            onFeedbackSubmit={handleFeedbackSubmit}
+          />
         </>
       )}
     </div>

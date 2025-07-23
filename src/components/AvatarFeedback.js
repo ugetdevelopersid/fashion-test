@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PersistentBackButton from './PersistentBackButton';
 
 function AvatarFeedback() {
   const [selectedIssues, setSelectedIssues] = useState([]);
@@ -19,9 +20,7 @@ function AvatarFeedback() {
     );
   };
 
-  const handleAdditionalFilters = () => {
-    navigate('/filters');
-  };
+
 
   const handleRegenerate = () => {
     console.log('Selected avatar issues:', selectedIssues);
@@ -30,8 +29,11 @@ function AvatarFeedback() {
 
   return (
     <div className="avatar-feedback-container">
+      {/* Persistent Back Button */}
+      <PersistentBackButton destination="/outfit-generation" />
+      
       {/* Header */}
-      <div className="outfit-header">
+      <div className="dashboard-header">
         <div className="brand">STYLLA</div>
         <button className="menu-button" onClick={handleMenuClick}>
           <div className="hamburger">
@@ -42,45 +44,39 @@ function AvatarFeedback() {
         </button>
       </div>
 
-      {/* Image Preview Section */}
-      <div className="image-preview-section">
-        <div className="preview-container">
-          <button className="nav-arrow left">
-            ←
-          </button>
-          <div className="image-preview">
-            <div className="preview-text">GENERATED IMAGE PREVIEW</div>
+      {/* Main Content */}
+      <div className="main-content">
+        {/* Image Preview Section */}
+        <div className="image-preview-card">
+          <div className="preview-container">
+            <div className="image-preview">
+              <div className="preview-text">GENERATED IMAGE PREVIEW</div>
+            </div>
           </div>
-          <button className="nav-arrow right">
-            →
-          </button>
         </div>
-      </div>
 
-      {/* Feedback Modal */}
-      <div className="feedback-modal">
-        <h2 className="feedback-title">What part of the avatar feels inaccurate?</h2>
-        <p className="feedback-subtitle">(Select all that apply)</p>
-        
-        <div className="issue-selection">
-          {avatarIssues.map((issue) => (
-            <button
-              key={issue}
-              className={`issue-button ${selectedIssues.includes(issue) ? 'selected' : ''}`}
-              onClick={() => handleIssueToggle(issue)}
-            >
-              {issue}
+        {/* Feedback Section */}
+        <div className="feedback-section">
+          <div className="section-title">What part of the avatar feels inaccurate?</div>
+          <p className="feedback-subtitle">(Select all that apply)</p>
+          
+          <div className="issue-selection">
+            {avatarIssues.map((issue) => (
+              <button
+                key={issue}
+                className={`selection-button ${selectedIssues.includes(issue) ? 'selected' : ''}`}
+                onClick={() => handleIssueToggle(issue)}
+              >
+                {issue}
+              </button>
+            ))}
+          </div>
+
+          <div className="feedback-actions">
+            <button className="action-button primary" onClick={handleRegenerate}>
+              REGENERATE
             </button>
-          ))}
-        </div>
-
-        <div className="feedback-actions">
-          <button className="filters-button" onClick={handleAdditionalFilters}>
-            Additional Filters
-          </button>
-          <button className="regenerate-button" onClick={handleRegenerate}>
-            REGENERATE
-          </button>
+          </div>
         </div>
       </div>
     </div>

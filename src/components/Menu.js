@@ -45,7 +45,7 @@ function Menu() {
           <hr className="menu-divider" />
         </div>
 
-        {/* Menu Items */}
+        {/* Menu Items - Simplified to essential tabs only */}
         <div className="menu-items">
           <div className="menu-item" onClick={() => navigate('/dashboard')}>
             Home
@@ -53,22 +53,7 @@ function Menu() {
           <hr className="menu-divider" />
           
           <div className="menu-item" onClick={() => navigate('/personal-info')}>
-            My Profile
-          </div>
-          <hr className="menu-divider" />
-          
-          <div className="menu-item" onClick={() => navigate('/clothing-selection')}>
-            Saved outfits
-          </div>
-          <hr className="menu-divider" />
-          
-          <div className="menu-item" onClick={() => navigate('/filters')}>
-            Edit preferences
-          </div>
-          <hr className="menu-divider" />
-          
-          <div className="menu-item" onClick={() => alert('FAQs coming soon!')}>
-            FAQs
+            User Information
           </div>
           <hr className="menu-divider" />
         </div>
