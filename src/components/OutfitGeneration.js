@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import PersistentBackButton from './PersistentBackButton';
 import RegenerateModal from './RegenerateModal';
 import InteractiveFeedback from './InteractiveFeedback';
+import GeneratedOutfits from './GeneratedOutfits';
+import { generateOutfits } from '../services/openaiService';
+import { generateOutfitImage } from '../services/imageGenerationService';
 
 function OutfitGeneration() {
   const [rating, setRating] = useState(null);
-  const [showProfileViews, setShowProfileViews] = useState(false);
-  const [currentTab, setCurrentTab] = useState('back');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [feedbackData, setFeedbackData] = useState({
@@ -19,54 +20,17 @@ function OutfitGeneration() {
     additionalComments: ''
   });
   const [showThankYou, setShowThankYou] = useState(false);
-  const [showGeneratedImage, setShowGeneratedImage] = useState(true); // Changed to true to show image directly
+  const [showGeneratedImage, setShowGeneratedImage] = useState(false); // Start with category selection
   const [showInteractiveFeedback, setShowInteractiveFeedback] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState({
-    'User Preferences': false,
-    'Outfit Preferences': false
-  });
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedOutfits, setGeneratedOutfits] = useState(null);
+  const [outfitError, setOutfitError] = useState(null);
+  const [outfitCount, setOutfitCount] = useState(3); // Default to 3 outfits
+  const [userProfile, setUserProfile] = useState(null);
   const navigate = useNavigate();
-
-  // Category structure
-  const categories = {
-    'User Preferences': ['Colour Group', 'Fabric Type', 'Fit', 'Pattern', 'Personal Style-Archetypes', 'Notes'],
-    'Outfit Preferences': ['Top', 'Bottom', 'Dress', 'Outerwear', 'Shoes', 'Accessory', 'Brand Preferences']
-  };
-
-  const toggleCategoryExpansion = (category) => {
-    // Close all other categories when opening a new one
-    const newExpandedCategories = {
-      'User Preferences': false,
-      'Outfit Preferences': false
-    };
-    
-    // Toggle the selected category
-    newExpandedCategories[category] = !expandedCategories[category];
-    setExpandedCategories(newExpandedCategories);
-  };
-
-  const handleSubCategoryClick = (subCategory) => {
-    setSelectedSubCategory(subCategory);
-  };
 
   const handleMenuClick = () => {
     navigate('/menu');
-  };
-
-  const handlePreviousImage = () => {
-    // Navigate to previous generated image
-    console.log('Previous image');
-  };
-
-  const handleNextImage = () => {
-    // Navigate to next generated image
-    console.log('Next image');
-  };
-
-  const handleRating = (value) => {
-    setRating(value);
   };
 
   const handleSubmitRating = () => {
@@ -86,17 +50,7 @@ function OutfitGeneration() {
     setShowInteractiveFeedback(false);
   };
 
-  const handleViewToggle = (tab) => {
-    setCurrentTab(tab);
-  };
-
-  const handleProfileViewsToggle = () => {
-    setShowProfileViews(!showProfileViews);
-  };
-
-  const handleFeedbackToggle = () => {
-    setShowFeedbackForm(!showFeedbackForm);
-  };
+  // Removed unused function to fix ESLint warning
 
   const handleFeedbackChange = (field, value) => {
     setFeedbackData({
@@ -117,27 +71,124 @@ function OutfitGeneration() {
     }, 3000);
   };
 
-  const handleGenerateClick = () => {
+  const handleGenerateClick = async () => {
+    console.log('Generate button clicked!');
     setIsGenerating(true);
+    setOutfitError(null);
     
-    // Simulate generation delay
-    setTimeout(() => {
+    try {
+      // Get user data from localStorage
+      const userData = localStorage.getItem('userData');
+      console.log('User data from localStorage:', userData);
+      
+      if (!userData) {
+        console.log('No user data found, showing error');
+        setOutfitError('Please complete your profile setup first');
+        setIsGenerating(false);
+        return;
+      }
+
+      const user = JSON.parse(userData);
+      console.log('Parsed user data:', user);
+      
+      // Build user profile from actual user data
+      const userProfileData = {
+        eventName: 'brunch', // Default event, could be made dynamic
+        gender: user.gender || 'Male',
+        age: user.ageRange ? user.ageRange.split('(')[1]?.split('-')[0] || '28' : '28',
+        height: user.heightInches ? user.heightInches.toString() : '179',
+        weight: '75', // Not collected in current forms, using default
+        // Body measurements - convert to cm if needed
+        shoulder_cm: user.gender === 'Male' ? (parseInt(user.bust || 40) * 2.54) : null,
+        waist_cm: parseInt(user.waist || 32) * 2.54,
+        hip_cm: parseInt(user.hips || 38) * 2.54,
+        height_cm: user.heightInches ? (user.heightInches * 2.54) : 179,
+        // Body shape and build data
+        bodyShape: 'Apple', // Could be calculated based on measurements
+        buildProportions: `${user.heightInches ? (user.heightInches >= 70 ? 'Tall' : 'Average') : 'Average'} height, ${user.gender === 'Male' ? 'Athletic' : 'Regular'} build`,
+        brandPreferences: user.brandsPreferred || 'Uniqlo, Zara, H&M, thrifting',
+        personalStyle: user.personalStyle ? user.personalStyle.join(', ') : 'minimalist-classic, casual, streetwear, preppy',
+        skinTone: user.skinTone || 'Wheatish',
+        undertone: 'neutral undertone or low contrast',
+        hairColor: user.hairColor || 'black',
+        location: 'New Delhi, India', // Could be made dynamic
+        weatherSeason: 'Hot and humid day', // Could be made dynamic
+        profession: 'Professional', // Could be made dynamic
+        budgetRange: 'mid market', // Could be made dynamic
+        outfitCount: outfitCount // Add the user's selected outfit count
+      };
+      
+      setUserProfile(userProfileData);
+      
+      console.log('User profile being sent to API:', userProfileData);
+      console.log('Selected outfit count:', outfitCount);
+      
+      // Check if API key is configured
+      if (!process.env.REACT_APP_OPENAI_API_KEY) {
+        console.error('❌ OpenAI API key not configured');
+        setOutfitError('OpenAI API key not configured. Please create a .env.local file with REACT_APP_OPENAI_API_KEY=your_api_key');
+        setIsGenerating(false);
+        return;
+      }
+      
+      const result = await generateOutfits(userProfileData);
+      console.log('API result:', result);
+      
+      if (result.success) {
+        console.log('Success! Setting generated outfits');
+        setGeneratedOutfits({
+          ...result.outfits,
+        });
+        setShowGeneratedImage(true);
+        
+        // Automatically generate image after outfits are created
+        console.log('Automatically generating image...');
+        try {
+          const imageResult = await generateOutfitImage(result.outfits, userProfileData);
+          if (imageResult.success) {
+            console.log('Image generated successfully:', imageResult.imageUrl);
+            // Store the image result in the outfits data
+            const outfitsWithImage = {
+              ...result.outfits,
+              generatedImage: imageResult
+            };
+            setGeneratedOutfits(outfitsWithImage);
+          } else {
+            console.log('Image generation failed:', imageResult.error);
+            // Continue with outfits even if image fails
+          }
+        } catch (error) {
+          console.error('Error in automatic image generation:', error);
+          // Continue with outfits even if image fails
+        }
+      } else {
+        console.log('API returned error:', result.error);
+        setOutfitError(result.error || 'Failed to generate outfits');
+      }
+    } catch (error) {
+      console.error('Error generating outfits:', error);
+      setOutfitError('Failed to generate outfits. Please try again.');
+    } finally {
+      console.log('Setting isGenerating to false');
       setIsGenerating(false);
-      setShowGeneratedImage(true);
-    }, 2000);
+    }
   };
 
   const handleRegenerate = () => {
     setShowRegenerateModal(true);
   };
 
+  const handleRegenerateOutfits = () => {
+    setGeneratedOutfits(null);
+    setOutfitError(null);
+    setShowGeneratedImage(false);
+  };
+
   const handleMorePreferences = () => {
     navigate('/filters');
   };
 
-  const handleBackToCategorySelection = () => {
-    setShowGeneratedImage(false);
-  };
+
 
   return (
     <div className="outfit-container">
@@ -157,61 +208,55 @@ function OutfitGeneration() {
       </div>
 
       {!showGeneratedImage ? (
-        // Category Selection Step
-        <div className="category-selection-container">
-          <div className="categories-panel">
-            {Object.entries(categories).map(([category, subCategories]) => (
-              <div key={category} className="category-section">
-                <div 
-                  className="category-header dropdown-header" 
-                  onClick={() => toggleCategoryExpansion(category)}
-                >
-                  <span>{category}</span>
-                  <span className="dropdown-arrow">{expandedCategories[category] ? '▲' : '▼'}</span>
-                </div>
-                {expandedCategories[category] && (
-                  <div className="category-items">
-                    {subCategories.map((subCategory, index) => (
-                      <div key={index}>
-                        <button
-                          className={`subcategory-button ${selectedSubCategory === subCategory ? 'active' : ''}`}
-                          onClick={() => handleSubCategoryClick(subCategory)}
-                        >
-                          {subCategory}
-                        </button>
-                        {index < subCategories.length - 1 && <hr className="subcategory-divider" />}
-                      </div>
-                    ))}
-                  </div>
-                )}
+        // Simple Generate Button Step
+        <div className="generate-container">
+          <div className="generate-content">
+            <h2 className="generate-title">Ready to Generate Your Outfits?</h2>
+            <p className="generate-subtitle">Choose how many outfits you'd like to see and click generate for personalized recommendations.</p>
+            
+            <div className="outfit-count-selector">
+              <label className="outfit-count-label">Number of Outfits:</label>
+              <div className="outfit-count-buttons">
+                {[1, 2, 3, 4, 5, 6].map((count) => (
+                  <button
+                    key={count}
+                    className={`outfit-count-button ${outfitCount === count ? 'active' : ''}`}
+                    onClick={() => setOutfitCount(count)}
+                  >
+                    {count}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
-          
-          <div className="category-selection-actions">
-            <button 
-              className={`generate-button ${isGenerating ? 'generating' : ''}`}
-              onClick={handleGenerateClick}
-              disabled={!selectedSubCategory || isGenerating}
-            >
-              {isGenerating ? 'GENERATING...' : 'GENERATE'}
-            </button>
-            <button className="more-preferences-button" onClick={handleMorePreferences}>
-              More Preferences
-            </button>
+            </div>
+            
+            <div className="generate-actions">
+              <button 
+                className={`generate-button ${isGenerating ? 'generating' : ''}`}
+                onClick={() => {
+                  console.log('Button clicked!');
+                  handleGenerateClick();
+                }}
+                disabled={isGenerating}
+              >
+                {isGenerating ? 'GENERATING...' : `GENERATE ${outfitCount} OUTFIT${outfitCount > 1 ? 'S' : ''}`}
+              </button>
+              <button className="more-preferences-button" onClick={handleMorePreferences}>
+                More Preferences
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        // Generated Image Step
+        // Generated Outfits Step
         <>
-          {/* Image Preview Section */}
-          <div className="image-preview-section">
-            <div className="preview-container">
-              <div className="image-preview">
-                <div className="preview-text">GENERATED IMAGE PREVIEW</div>
-              </div>
-            </div>
-          </div>
+          {/* Generated Outfits Display */}
+          <GeneratedOutfits
+            outfits={generatedOutfits}
+            isLoading={isGenerating}
+            error={outfitError}
+            onRegenerate={handleRegenerateOutfits}
+            userProfile={userProfile}
+          />
           
           {/* Action Buttons */}
           <div className="action-buttons">

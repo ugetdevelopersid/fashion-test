@@ -1394,6 +1394,8 @@ code {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 .outfit-header {
@@ -1402,6 +1404,23 @@ code {
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+/* Mobile responsive for outfit container */
+@media (max-width: 768px) {
+  .outfit-container {
+    min-height: 100vh;
+  }
+  
+  .outfit-header {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .outfit-header {
+    padding: 12px;
+  }
 }
 
 .image-preview-section {
@@ -4503,5 +4522,228 @@ code {
   }
   100% {
     left: 100%;
+  }
+}
+
+/* Generate Container Styles */
+.generate-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.generate-content {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+.generate-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.generate-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.generate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.generate-actions .generate-button {
+  width: 100%;
+  max-width: 300px;
+  padding: 18px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.25);
+}
+
+.generate-actions .generate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 123, 255, 0.35);
+}
+
+.generate-actions .more-preferences-button {
+  font-size: 0.95rem;
+  color: #007bff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.generate-actions .more-preferences-button:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
+/* Outfit Count Selector Styles */
+.outfit-count-selector {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.outfit-count-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.outfit-count-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.outfit-count-button {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.outfit-count-button:hover {
+  border-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.05);
+  color: #007bff;
+}
+
+.outfit-count-button.active {
+  border-color: #007bff;
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .generate-container {
+    padding: 16px;
+  }
+  
+  .generate-content {
+    padding: 32px 24px;
+    border-radius: 12px;
+  }
+  
+  .generate-title {
+    font-size: 1.75rem;
+    margin-bottom: 12px;
+  }
+  
+  .generate-subtitle {
+    font-size: 1rem;
+    margin-bottom: 28px;
+  }
+  
+  .outfit-count-selector {
+    margin-bottom: 28px;
+  }
+  
+  .outfit-count-label {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+  }
+  
+  .outfit-count-buttons {
+    gap: 6px;
+  }
+  
+  .outfit-count-button {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+  
+  .generate-actions .generate-button {
+    padding: 16px 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .generate-container {
+    padding: 12px;
+  }
+  
+  .generate-content {
+    padding: 24px 20px;
+    border-radius: 10px;
+  }
+  
+  .generate-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .generate-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+  
+  .outfit-count-selector {
+    margin-bottom: 24px;
+  }
+  
+  .outfit-count-label {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  
+  .outfit-count-buttons {
+    gap: 4px;
+  }
+  
+  .outfit-count-button {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  
+  .generate-actions .generate-button {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+  
+  .generate-actions .more-preferences-button {
+    font-size: 0.9rem;
+    padding: 6px 12px;
   }
 }
