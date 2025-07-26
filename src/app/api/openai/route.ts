@@ -12,6 +12,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // console.log('prompt', prompt);
+
     // Get OpenAI API key from environment variables
     const apiKey = process.env.OPENAI_API_KEY;
     
@@ -34,19 +36,25 @@ export async function POST(request: NextRequest) {
         prompt: prompt,
         size: "1536x1024",
         quality: "medium",
-        background: "transparent"
+        background: "transparent",
       });
 
-      const imageUrl = image.data?.[0]?.url;
+      const imageBase64 = image.data?.[0]?.b64_json;
 
-      if (!imageUrl) {
+      if (!imageBase64) {
         return NextResponse.json(
           { error: 'No image generated from OpenAI' },
           { status: 500 }
         );
       }
 
-      return NextResponse.json({ imageUrl });
+      // Create data URL from base64
+      const imageUrl = `data:image/png;base64,${imageBase64}`;
+
+      return NextResponse.json({ 
+        imageUrl,
+        message: 'Image generated successfully'
+      });
     } else {
       // Generate text (existing functionality)
       const completion = await openai.chat.completions.create({
