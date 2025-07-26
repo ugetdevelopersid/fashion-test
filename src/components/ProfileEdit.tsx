@@ -8,6 +8,7 @@ import MeasurementInput from './MeasurementInput';
 import WeightInput from './WeightInput';
 import SkinToneSelector from './SkinToneSelector';
 import HairColorSelector from './HairColorSelector';
+import StylePreferences from './StylePreferences';
 import { FiUsers, FiCalendar, FiScissors } from 'react-icons/fi';
 
 interface ProfileEditProps {
@@ -28,13 +29,17 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
   const [skinTone, setSkinTone] = useState(profile.skinTone || '');
   const [hairLength, setHairLength] = useState(profile.hairLength || '');
   const [hairColor, setHairColor] = useState(profile.hairColor || '');
+  const [personalStyle, setPersonalStyle] = useState(profile.personalStyle || '');
+  const [brand, setBrand] = useState(profile.brand || '');
+  const [notes, setNotes] = useState(profile.notes || '');
+
   
   // UI state
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   // Calculate progress percentage
   const getProgressPercentage = () => {
@@ -72,6 +77,15 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
         }
         return true;
         
+      case 4: // Style Preferences
+        if (!personalStyle || personalStyle.trim() === '') {
+          setError('Please select at least one personal style');
+          return false;
+        }
+        return true;
+        
+
+        
       default:
         return false;
     }
@@ -96,7 +110,11 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
         hip: hip,
         skinTone: skinTone,
         hairLength: hairLength,
-        hairColor: hairColor
+        hairColor: hairColor,
+        personalStyle: personalStyle,
+        brand: brand,
+        notes: notes,
+
       };
 
       await updateUser(profile.id, userData);
@@ -147,9 +165,7 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
 
   const genderOptions = [
     { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'non-binary', label: 'Non-binary' },
-    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
+    { value: 'female', label: 'Female' }
   ];
 
 
@@ -170,6 +186,8 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
       case 1: return 'Basic Information';
       case 2: return 'Body Measurements';
       case 3: return 'Appearance Details';
+      case 4: return 'Style Preferences';
+
       default: return '';
     }
   };
@@ -180,6 +198,8 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
       case 1: return 'Update your basic information';
       case 2: return 'Update your body measurements';
       case 3: return 'Update your appearance details';
+      case 4: return 'Tell us about your style preferences';
+
       default: return '';
     }
   };
@@ -329,6 +349,25 @@ export default function ProfileEdit({ profile, onComplete, onCancel }: ProfileEd
             />
           </div>
         );
+
+      case 4:
+        return (
+          <div className="space-y-4">
+            <StylePreferences
+              personalStyle={personalStyle}
+              brand={brand}
+              notes={notes}
+              isEditing={true}
+              onSave={(data) => {
+                setPersonalStyle(data.personalStyle);
+                setBrand(data.brand);
+                setNotes(data.notes);
+              }}
+            />
+          </div>
+        );
+
+
 
       default:
         return null;

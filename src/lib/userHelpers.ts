@@ -16,6 +16,13 @@ export interface UserProfile {
   skinTone?: string;
   hairLength?: string;
   hairColor?: string;
+  personalStyle?: string;
+  brand?: string;
+  notes?: string;
+  weatherTemperature?: string; // warm, hot, cool, cold, pleasant
+  weatherCondition?: string; // clear, dry, windy, breezy, rainy, humid
+  locationCity?: string;
+  locationCountry?: string;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -48,7 +55,9 @@ export const isProfileComplete = (profile: any): boolean => {
          profile.hairLength &&
          profile.hairLength.trim() !== '' &&
          profile.hairColor &&
-         profile.hairColor.trim() !== '';
+         profile.hairColor.trim() !== '' &&
+         profile.personalStyle &&
+         profile.personalStyle.trim() !== '';
 };
 
 // Get user profile from Firestore

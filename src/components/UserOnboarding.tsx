@@ -7,6 +7,7 @@ import MeasurementInput from './MeasurementInput';
 import WeightInput from './WeightInput';
 import SkinToneSelector from './SkinToneSelector';
 import HairColorSelector from './HairColorSelector';
+import StylePreferences from './StylePreferences';
 import { FiUsers, FiCalendar, FiScissors } from 'react-icons/fi';
 
 interface UserOnboardingProps {
@@ -25,6 +26,10 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
   const [skinTone, setSkinTone] = useState('');
   const [hairLength, setHairLength] = useState('');
   const [hairColor, setHairColor] = useState('');
+  const [personalStyle, setPersonalStyle] = useState('');
+  const [brand, setBrand] = useState('');
+  const [notes, setNotes] = useState('');
+
   
   // UI state
   const [currentStep, setCurrentStep] = useState(1);
@@ -32,7 +37,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState('');
 
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   // Load existing user data on component mount
   useEffect(() => {
@@ -57,6 +62,10 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
           setSkinTone(existingUser.skinTone || '');
           setHairLength(existingUser.hairLength || '');
           setHairColor(existingUser.hairColor || '');
+          setPersonalStyle(existingUser.personalStyle || '');
+          setBrand(existingUser.brand || '');
+          setNotes(existingUser.notes || '');
+
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -104,6 +113,15 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
         }
         return true;
         
+      case 4: // Style Preferences
+        if (!personalStyle || personalStyle.trim() === '') {
+          setError('Please select at least one personal style');
+          return false;
+        }
+        return true;
+        
+
+        
       default:
         return false;
     }
@@ -130,7 +148,11 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
         hip: hip,
         skinTone: skinTone,
         hairLength: hairLength,
-        hairColor: hairColor
+        hairColor: hairColor,
+        personalStyle: personalStyle,
+        brand: brand,
+        notes: notes,
+
       };
 
       if (existingUser) {
@@ -172,9 +194,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
 
   const genderOptions = [
     { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'non-binary', label: 'Non-binary' },
-    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
+    { value: 'female', label: 'Female' }
   ];
 
 
@@ -207,6 +227,8 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
       case 1: return 'Basic Information';
       case 2: return 'Body Measurements';
       case 3: return 'Appearance Details';
+      case 4: return 'Style Preferences';
+
       default: return '';
     }
   };
@@ -217,6 +239,8 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
       case 1: return 'Tell us about yourself';
       case 2: return 'Help us understand your body type';
       case 3: return 'Complete your style profile';
+      case 4: return 'Tell us about your style preferences';
+
       default: return '';
     }
   };
@@ -366,6 +390,25 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
             />
           </div>
         );
+
+      case 4:
+        return (
+          <div className="space-y-4">
+            <StylePreferences
+              personalStyle={personalStyle}
+              brand={brand}
+              notes={notes}
+              isEditing={true}
+              onSave={(data) => {
+                setPersonalStyle(data.personalStyle);
+                setBrand(data.brand);
+                setNotes(data.notes);
+              }}
+            />
+          </div>
+        );
+
+
 
       default:
         return null;

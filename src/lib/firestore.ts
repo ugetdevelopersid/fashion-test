@@ -32,6 +32,10 @@ export interface UserData {
   skinTone?: string;
   hairLength?: string;
   hairColor?: string;
+  weatherTemperature?: string; // warm, hot, cool, cold, pleasant
+  weatherCondition?: string; // clear, dry, windy, breezy, rainy, humid
+  locationCity?: string;
+  locationCountry?: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }

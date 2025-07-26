@@ -1,0 +1,51 @@
+Create a single high-resolution composition showing {NO_OF_SUGGESTIONS} identical, featureless {GENDER} mannequins side by side, using inpainting mode with high guidance so that each step is executed sequentially and exactly as specified, with no facial features or additional accessories beyond those listed. Make sure the dressing and the mannequins look natural and realistic								
+								
+Composition & Models								
+Figures Quantity: {NO_OF_SUGGESTIONS} mannequins, evenly spaced across the frame							
+Height: {HEIGHT_DESCRIPTION}							
+Build: {BUILD_DESCRIPTION}					
+Skin tone: {SKIN_TONE}					
+								
+Pose & Environment								
+Stance: natural, relaxed, feet shoulder-width apart								
+Background: seamless light-gray studio backdrop								
+Lighting: soft, dimensional lighting with subtle, even floor shadows								
+								
+Step-by-Step Inpainting								
+"Mask Mannequin #1 with the Wheatish skintone and apply:
+Top: Oversized white linen shirt (relaxed sleeves, slightly tucked in front)
+Bottom: Relaxed-fit olive cotton-blend chinos, ankle-length
+Footwear: White leather sneakers (minimalistic)
+Accessories: Silver metallic wristwatch"								
+								
+"Mask Mannequin #2 with the Wheatish skintone and apply:
+Top: Sky blue relaxed cotton-blend polo (short sleeve)
+Bottom: Loose-fit beige linen trousers
+Footwear: Brown suede loafers
+Accessories: Brown leather belt, thin silver bracelet"								
+								
+"Mask Mannequin #3 with the Wheatish skintone and apply:
+Top: Oversized coral cotton-blend crew-neck T-shirt
+Bottom: Relaxed-fit faded blue denim jeans, cuffed at ankle
+Footwear: Classic white canvas sneakers
+Accessories: Minimalistic silver pendant necklace
+
+"								
+								
+"Mask Mannequin #4 with the Wheatish skintone and apply:
+Top: Relaxed mint-green rayon short-sleeve button-down shirt
+Bottom: Loose-fit white linen trousers, slightly cropped
+Footwear: Gray suede slip-on shoes
+Accessories: Silver ring, leather-strap watch"								
+								
+"Mask Mannequin #5 with the Wheatish skintone and apply:
+Top: Oversized fuchsia cotton-blend hoodie (lightweight, short-sleeved)
+Bottom: Relaxed-fit charcoal-gray nylon-blend joggers
+Footwear: Black mesh sneakers
+Accessories: Slim silver chain bracelet"								
+								
+"Mask Mannequin #6 with the Wheatish skintone and apply:
+Top: Relaxed-fit rust-colored linen-blend button-up shirt, sleeves rolled up
+Bottom: Oversized off-white cotton-blend trousers, drawstring waist
+Footwear: Brown leather sandals (closed-toe, office-appropriate)
+Accessories: Silver cuff bracelet"								
